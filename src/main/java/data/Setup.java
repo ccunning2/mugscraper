@@ -1,20 +1,25 @@
 package data;
 
+import model.Booking;
+import model.Charges;
 import model.Person;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public  class Setup {
+class Setup {
 
-    public static void setup() {
-        SessionFactory sessionFactory = new Configuration().addAnnotatedClass(Person.class).configure().buildSessionFactory();
+    static Session setup() {
+        SessionFactory sessionFactory = new Configuration().addAnnotatedClass(Person.class)
+                .addAnnotatedClass(Charges.class)
+                .addAnnotatedClass(Booking.class)
+                .configure().buildSessionFactory();
 
-        Session session = sessionFactory.openSession();
-        session.beginTransaction();
-        session.save(p);
-        session.getTransaction().commit();
-        session.close();
+        return sessionFactory.openSession();
+//        session.beginTransaction();
+//        session.save(p);
+//        session.getTransaction().commit();
+//        session.close();
     }
 
 

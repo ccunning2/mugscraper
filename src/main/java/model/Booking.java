@@ -1,9 +1,14 @@
 package model;
 
 import javax.persistence.*;
-import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Set;
 
+@Entity
+@Table(name = "booking")
 public class Booking {
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
@@ -11,12 +16,16 @@ public class Booking {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="person_id")
-    private int person;
+    private Person person;
 
-
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="booking_time")
-    private Timestamp bookingTime;
+    private Date bookingTime;
 
+
+    @OneToMany
+    @JoinTable(name = "booking_charges", joinColumns = @JoinColumn(name = "booking_id"), inverseJoinColumns = @JoinColumn(name = "charges_id"))
+    private Set<Charges> chargesSet;
 
 
 }
