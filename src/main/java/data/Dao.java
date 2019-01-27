@@ -1,5 +1,6 @@
 package data;
 
+import model.Booking;
 import model.Charges;
 import model.Person;
 import org.hibernate.Session;
@@ -22,7 +23,7 @@ public class Dao {
     }
 
     public Person getPerson(Person p) {
-        String hql = "FROM Person p WHERE p.first_name = :firstName AND p.last_name = :lastName and p.dob = :DOB";
+        String hql = "FROM Person p WHERE p.firstName = :firstName AND p.lastName = :lastName and p.dob = :DOB";
         Query query = createPersonQuery(p, hql);
         return (Person) query.getSingleResult();
 
@@ -69,9 +70,36 @@ public class Dao {
         return new SimpleDateFormat(PERSON_DATE_FORMAT).parse(DOB);
     }
 
+    private Date getBookingDate(String bookingDate) throws ParseException {
+        bookingDate = bookingDate.replaceAll("@", "");
+        return new SimpleDateFormat(BOOKING_TIME_FORMAT).parse(bookingDate);
+    }
+
     public Person createPerson(String firstName, String lastName, String race, String sex, String DOB) throws ParseException {
         return new Person(firstName, lastName, sex, race, getPersonDate(DOB));
     }
 
+    public boolean bookingExists(Booking b) {
+        String hql = "SELECT COUNT(*) FROM Booking b WHERE b.person = :person AND b.bookingTime = :bookingTime";
+        Query query = createBookingQuery(b, hql);
+        return false;
+    }
 
+    private Query createBookingQuery(Booking b, String hql) {
+        Query query = session.createQuery(hql);
+        query.setParameter("person", b.getPerson());
+        query.setParameter("bookingTime", b.getBookingTime());
+        return query;
+    }
+
+
+    public Charges getCharges(Charges c) {
+        String hql = "FROM Charges c WHERE c.description = :description";
+        Query query = createChargesQuery(c, hql);
+        return (Charges) query.getSingleResult();
+    }
+
+    public Booking createBooking(Person p, String date) throws ParseException {
+        return new Booking(p, getBookingDate(date));
+    }
 }
