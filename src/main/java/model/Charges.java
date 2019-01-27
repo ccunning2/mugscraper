@@ -29,4 +29,11 @@ public class Charges {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public Charges() {
+    }
+
+    public Charges(String description) {
+        this.description = description;
+    }
 }
