@@ -23,6 +23,9 @@ public class Booking {
     @Column(name="booking_time")
     private Date bookingTime;
 
+    @Column(name = "image_path")
+    private String imagePath;
+
 
     @OneToMany
     @JoinTable(name = "booking_charges", joinColumns = @JoinColumn(name = "booking_id"), inverseJoinColumns = @JoinColumn(name = "charges_id"))
@@ -63,5 +66,13 @@ public class Booking {
 
     public void addCharge(Charges c) {
         this.chargesSet.add(c);
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

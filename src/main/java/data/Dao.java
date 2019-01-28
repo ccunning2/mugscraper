@@ -82,7 +82,7 @@ public class Dao {
     public boolean bookingExists(Booking b) {
         String hql = "SELECT COUNT(*) FROM Booking b WHERE b.person = :person AND b.bookingTime = :bookingTime";
         Query query = createBookingQuery(b, hql);
-        return false;
+        return (Long) query.getSingleResult() >= 1;
     }
 
     private Query createBookingQuery(Booking b, String hql) {

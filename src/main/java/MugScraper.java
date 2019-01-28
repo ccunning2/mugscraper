@@ -2,6 +2,7 @@ import data.Dao;
 import model.Booking;
 import model.Charges;
 import model.Person;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -9,6 +10,11 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -23,6 +29,7 @@ public class MugScraper {
     private static final String PATH_TO_UBLOCK = "src/main/Resources/uBlock0@raymondhill.net.xpi";
     private static final String DESIRED_CLASS = "mugshots__inmate";
     private static final String URL = "https://www.journalstar.com/mugshots/?page={pageNum}";
+    private static final String FILE_PATH_BASE = "C:\\mugshots\\";
 
     private static Map<String, Integer> bioMap = new HashMap<>();
 
@@ -67,6 +74,9 @@ public class MugScraper {
                     WebElement bio = mugshot.findElement(By.className("mugshots__bio"));
                     WebElement charges = mugshot.findElement(By.className("mugshots__charges"));
 
+                    WebElement pic = mugshot.findElement(By.className("img-responsive"));
+                    String imgSrc = pic.getAttribute("src");
+
                     Booking booking = null;
                     try {
                         booking = fillBooking(bio.getText().split("\\n"), d);
@@ -76,6 +86,12 @@ public class MugScraper {
                     if (d.bookingExists(booking)) {
                         System.err.println("Booking already exists!");
                         return;
+                    }
+                    //Booking does not exist, so save the image
+                    try {
+                        addMugshotImage(booking, imgSrc);
+                    } catch (IOException e) {
+                        System.out.println("IO Exception: " + booking.getImagePath());
                     }
                     fillCharges(booking, charges, d);
                     d.saveEntity(booking);
@@ -88,7 +104,18 @@ public class MugScraper {
 
             d.close();
             driver.quit();
+            System.exit(0);
         }
+    }
+
+    private static void addMugshotImage(Booking booking, String imgSrc) throws IOException {
+        URL imageURL = new URL(imgSrc);
+        BufferedImage saveImage = ImageIO.read(imageURL);
+        String imageSerial = String.valueOf(DateUtil.getExcelDate(booking.getBookingTime()));
+        String imagePath = FILE_PATH_BASE + booking.getPerson().getLastName() + "_" + imageSerial + ".jpg";
+        ImageIO.write(saveImage, "jpg", new File(imagePath));
+        booking.setImagePath(imagePath);
+
     }
 
     private static void fillCharges(Booking booking, WebElement charges, Dao d) {
